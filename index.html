@@ -8,8 +8,8 @@
   <title>Badminton Impact · Le Bon Sauveur</title>
   <link rel="icon" type="image/svg+xml" href="./icon.svg">
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="stylesheet" href="./styles.css?v=20261029-4">
-  <script src="./app.js?v=20261029-4" defer></script>
+  <link rel="stylesheet" href="./styles.css?v=20261029-5">
+  <script src="./app.js?v=20261029-5" defer></script>
 </head>
 <body>
   <div class="app-shell">
@@ -43,7 +43,7 @@
         </div>
         <div class="rules-strip">
           <span><b>0 PT</b> Rivière rose</span><span><b>1 PT</b> Au-dessus du sur-filet</span>
-          <span><b>2 PTS</b> En dessous du sur-filet</span><span><b>1 PT</b> Faute adverse</span>
+          <span><b>2 PTS</b> En dessous du sur-filet</span><span><b>1 PT</b> Faute du joueur → adversaire</span>
         </div>
       </section>
 
@@ -78,24 +78,24 @@
         </div>
         <div class="game-layout">
           <section class="play-panel" aria-labelledby="scoringTitle">
-            <div class="panel-heading"><div><p class="kicker">QUI MARQUE ?</p><h3 id="scoringTitle">TOUCHE LE JOUEUR.</h3></div></div>
-            <p class="panel-help">Choisis A ou B. Le joueur reste sélectionné jusqu’à ce que tu changes.</p>
+            <div class="panel-heading"><div><p class="kicker">QUI FRAPPE ?</p><h3 id="scoringTitle">CHOISIS LE JOUEUR.</h3></div></div>
+            <p class="panel-help">Sélectionne celui qui frappe : trajectoire réussie = ses points ; faute = +1 à l’adversaire.</p>
             <div class="live-scores">
-              <button type="button" class="score-card is-active" data-scorer="0" aria-pressed="true"><span class="score-id">A</span><span class="score-details"><strong id="playerName0">Joueur A</strong><small class="selected-text">POINTS POUR CE JOUEUR</small></span><span class="score-number" id="playerScore0">0</span></button>
-              <button type="button" class="score-card" data-scorer="1" aria-pressed="false"><span class="score-id">B</span><span class="score-details"><strong id="playerName1">Joueur B</strong><small class="selected-text">TOUCHER POUR SÉLECTIONNER</small></span><span class="score-number" id="playerScore1">0</span></button>
+              <button type="button" class="score-card is-active" data-scorer="0" aria-pressed="true"><span class="score-id">A</span><span class="score-details"><strong id="playerName0">Joueur A</strong><small class="selected-text">JOUE LE VOLANT</small></span><span class="score-number" id="playerScore0">0</span></button>
+              <button type="button" class="score-card" data-scorer="1" aria-pressed="false"><span class="score-id">B</span><span class="score-details"><strong id="playerName1">Joueur B</strong><small class="selected-text">TOUCHER POUR CHANGER</small></span><span class="score-number" id="playerScore1">0</span></button>
             </div>
-            <div class="selected-summary" aria-live="polite"><span class="selected-led"></span> Les points vont à <strong id="selectedName">Joueur A</strong></div>
-            <div class="quick-row"><button type="button" class="fault-btn" id="faultButton"><span>+1</span><span>FAUTE ADVERSE<small>Pour le joueur sélectionné</small></span></button><button type="button" class="undo-btn" id="undoButton">↶ ANNULER</button></div>
+            <div class="selected-summary" aria-live="polite"><span class="selected-led"></span> Volant joué par <strong id="selectedName">Joueur A</strong></div>
+            <div class="quick-row"><button type="button" class="fault-btn" id="faultButton"><span>+1</span><span>FAUTE DU JOUEUR<small>+1 à son adversaire</small></span></button><button type="button" class="undo-btn" id="undoButton">↶ ANNULER</button></div>
             <div class="match-actions"><button type="button" class="primary-btn finish-btn" id="finishButton">TERMINER LE MATCH <span>↗</span></button><button type="button" class="quiet-btn" id="clearButton">Effacer ce match</button></div>
           </section>
 
           <section class="play-panel court-panel" aria-labelledby="courtTitle">
-            <div class="panel-heading"><div><p class="kicker">UN SEUL TOUCHER</p><h3 id="courtTitle">OÙ TOMBE LE VOLANT ?</h3></div><span class="net-pill" id="netPill">SANS FILET</span></div>
-            <p class="panel-help">Dans chaque zone, touche directement <b>+1</b> (au-dessus) ou <b>+2</b> (en dessous du sur-filet).</p>
+            <div class="panel-heading"><div><p class="kicker">UN SEUL TOUCHER</p><h3 id="courtTitle">CHOISIS LA TRAJECTOIRE.</h3></div><span class="net-pill" id="netPill">SANS FILET</span></div>
+            <p class="panel-help">Touche la trajectoire : <b>+1</b> au-dessus, <b>+2</b> en dessous. Filet ou hors trajectoire : <b>+1 à l’adversaire</b>.</p>
             <div class="court-visual-shell">
               <div class="court-visual-meta"><span><span class="visual-dot"></span> DEMI-TERRAIN · VUE 3D</span><span>1 TOUCHE = 1 ACTION</span></div>
               <div class="court-visual-scroller">
-                <svg class="court-svg-3d" id="court3D" viewBox="0 0 980 690" role="group" aria-label="Demi-terrain de badminton en perspective 3D. Touchez un bouton de zone pour compter les points.">
+                <svg class="court-svg-3d" id="court3D" viewBox="0 0 980 690" role="group" aria-label="Demi-terrain de badminton en perspective 3D. Choisis une trajectoire. Toute autre zone correspond à une faute.">
                   <defs>
                     <linearGradient id="courtSurface" x1="0" y1="0" x2=".8" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#EFF6E5"/></linearGradient>
                     <linearGradient id="courtBackground" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fcfcfa"/><stop offset=".6" stop-color="#f1f4ec"/><stop offset="1" stop-color="#e9eee3"/></linearGradient>
@@ -110,8 +110,8 @@
                   <g id="courtArtwork"></g>
                 </svg>
               </div>
-              <div class="court-key"><span><i class="key-pink"></i> Rivière : <b>0</b></span><span><i class="key-beige"></i> Au-dessus : <b>+1</b></span><span><i class="key-lime"></i> En dessous : <b>+2</b></span></div>
-              <p class="court-warning" id="courtFeedback" role="status" aria-live="polite">Choisis ton joueur, puis touche une zone du terrain.</p>
+              <div class="court-key"><span><i class="key-pink"></i> Rivière : <b>0</b></span><span><i class="key-beige"></i> Au-dessus : <b>+1</b></span><span><i class="key-lime"></i> En dessous : <b>+2</b></span><span>Filet / dehors : <b>+1 adversaire</b></span></div>
+              <p class="court-warning" id="courtFeedback" role="status" aria-live="polite">Choisis le joueur qui frappe, puis touche une trajectoire.</p>
             </div>
           </section>
         </div>
@@ -124,6 +124,6 @@
     </main>
   </div>
   <dialog id="confirmDialog" class="modal"><form method="dialog" class="dialog-box"><p class="kicker" id="dialogKicker">CONFIRMATION</p><h2 id="dialogTitle">Confirmer ?</h2><p id="dialogText"></p><div class="dialog-actions"><button value="cancel" class="soft-btn">Annuler</button><button value="ok" class="primary-btn" id="dialogConfirm">Confirmer</button></div></form></dialog>
-  <dialog id="helpDialog" class="modal"><form method="dialog" class="dialog-box"><p class="kicker">MODE D'EMPLOI</p><h2>Une zone, un toucher.</h2><ol class="help-list"><li>Choisis l'une des trois situations.</li><li>Choisis une poule de 3 ou de 4 joueurs, puis saisis les prénoms.</li><li>Sur le terrain, touche d'abord le joueur qui marque (A ou B). Il reste sélectionné.</li><li>Dans la zone d'impact du demi-terrain, touche directement « +1 au-dessus » ou « +2 en dessous ». Rivière : 0 point.</li><li>Une faute adverse ajoute 1 point au joueur sélectionné.</li><li>Termine le match pour passer automatiquement à la rencontre suivante. Le classement et les niveaux se mettent à jour.</li></ol><p>Chaque poule conserve ses résultats sur cet appareil. L'export CSV permet de garder une copie.</p><div class="dialog-actions"><button value="cancel" class="primary-btn">C'est compris</button></div></form></dialog>
+  <dialog id="helpDialog" class="modal"><form method="dialog" class="dialog-box"><p class="kicker">MODE D'EMPLOI</p><h2>Une trajectoire, un toucher.</h2><ol class="help-list"><li>Choisis l'une des trois situations.</li><li>Choisis une poule de 3 ou de 4 joueurs, puis saisis les prénoms.</li><li>Sur le terrain, choisis celui qui frappe le volant (A ou B). Il reste sélectionné.</li><li>Touche la trajectoire haute pour +1, ou la trajectoire basse pour +2. La rivière rapporte 0 point.</li><li>Tout autre toucher, notamment dans le filet ou hors terrain, donne automatiquement +1 à l’adversaire du joueur sélectionné.</li><li>Termine le match pour passer automatiquement à la rencontre suivante. Le classement et les niveaux se mettent à jour.</li></ol><p>Chaque poule conserve ses résultats sur cet appareil. L'export CSV permet de garder une copie.</p><div class="dialog-actions"><button value="cancel" class="primary-btn">C'est compris</button></div></form></dialog>
 </body>
 </html>
