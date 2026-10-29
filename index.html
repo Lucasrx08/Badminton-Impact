@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#B4D01A">
-  <meta name="description" content="Badminton Impact : compter les points en touchant les zones du terrain pour les trois situations EPS de Lucas Rigaux.">
-  <title>Badminton Impact • EPS Lucas Rigaux</title>
+  <meta name="description" content="Badminton Impact : scores tactiles et poules de 3 ou 4 joueurs pour les trois situations EPS de L. Rigaux.">
+  <title>Badminton Impact · Le Bon Sauveur</title>
   <link rel="icon" type="image/svg+xml" href="./icon.svg">
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="stylesheet" href="./styles.css">
@@ -14,110 +14,111 @@
 <body>
   <div class="app-shell">
     <header class="site-header">
-      <div class="brand">
-        <div class="brand-mark" aria-hidden="true">
-          <svg viewBox="0 0 60 60" fill="none"><path d="M14 10 25 36M26 7l6 27M38 9l1 25M49 17l-7 21" stroke="#fff" stroke-width="5" stroke-linecap="round"/><path d="m22 35 21 2-5 12-9 3-7-9z" fill="#968769" stroke="#fff" stroke-width="2"/></svg>
-        </div>
-        <div>
-          <p class="eyebrow">LE BON SAUVEUR · EPS</p>
-          <h1>BADMINTON <span>IMPACT</span></h1>
-        </div>
+      <div class="brand" aria-label="Badminton Impact">
+        <div class="brand-mark" aria-hidden="true"><svg viewBox="0 0 60 60" fill="none"><path d="M14 10 25 36M26 7l6 27M38 9l1 25M49 17l-7 21" stroke="#fff" stroke-width="5" stroke-linecap="round"/><path d="m22 35 21 2-5 12-9 3-7-9z" fill="#968769" stroke="#fff" stroke-width="2"/></svg></div>
+        <div><p class="eyebrow">LE BON SAUVEUR · EPS</p><h1>BADMINTON <span>IMPACT</span></h1></div>
       </div>
-      <div class="header-right">
-        <span class="offline-pill"><span aria-hidden="true" class="offline-dot"></span> Données sur cet appareil</span>
-        <button type="button" class="icon-btn header-help" id="helpButton" aria-label="Afficher le mode d'emploi" title="Mode d'emploi">?</button>
-      </div>
+      <div class="header-right"><span class="offline-pill">● Sauvegarde sur cet appareil</span><button type="button" class="icon-btn" id="helpButton" aria-label="Mode d'emploi">?</button></div>
     </header>
 
     <main>
-      <section class="mode-section" aria-labelledby="modeTitle">
-        <div class="section-heading">
-          <div><p class="kicker">01 / CHOISIR LE DISPOSITIF</p><h2 id="modeTitle">Trois terrains, une progression.</h2></div>
-          <span class="small-hint">Change de situation sans perdre les scores.</span>
+      <section id="homeView" class="view">
+        <div class="intro">
+          <div class="intro-copy"><p class="kicker">TON CYCLE BADMINTON</p><h2>CHOISIS TA <em>SITUATION.</em></h2><p>Trois dispositifs, un comptage simple : un toucher sur le demi-terrain et les points s’ajoutent.</p></div>
+          <div class="intro-stamp" aria-hidden="true"><span>3</span><small>SITUATIONS</small></div>
         </div>
-        <div class="mode-picker" id="modePicker" role="group" aria-label="Situation pédagogique">
-          <button type="button" class="mode-card" data-mode="baston" aria-pressed="true"><span class="mode-number">01</span><span class="mode-name">LA BASTON</span><span class="mode-detail">Sans filet · Sur-filet jaune</span><span class="mode-glyph mode-glyph--none" aria-hidden="true"></span></button>
-          <button type="button" class="mode-card" data-mode="carre" aria-pressed="false"><span class="mode-number">02</span><span class="mode-name">LE CARRÉ MAGIQUE</span><span class="mode-detail">Filet abaissé · Mode tennis</span><span class="mode-glyph mode-glyph--low" aria-hidden="true"></span></button>
-          <button type="button" class="mode-card" data-mode="roi" aria-pressed="false"><span class="mode-number">03</span><span class="mode-name">LE ROI DU TERRAIN</span><span class="mode-detail">Filet à hauteur normale</span><span class="mode-glyph mode-glyph--normal" aria-hidden="true"></span></button>
+        <div class="home-cards" aria-label="Choisir une situation">
+          <button class="home-card home-card--baston" type="button" data-mode="baston">
+            <span class="home-index">01 / DÉCOUVERTE</span><strong>LA BASTON</strong><span class="home-description">Sans filet de badminton. Sur-filet jaune.</span>
+            <span class="home-foot"><span>NIVEAUX 1 → 2</span><span class="home-go">COMMENCER ↗</span></span>
+          </button>
+          <button class="home-card home-card--carre" type="button" data-mode="carre">
+            <span class="home-index">02 / PROGRESSION</span><strong>LE CARRÉ MAGIQUE</strong><span class="home-description">Filet abaissé en mode tennis + sur-filet.</span>
+            <span class="home-foot"><span>NIVEAUX 1 → 3</span><span class="home-go">COMMENCER ↗</span></span>
+          </button>
+          <button class="home-card home-card--roi" type="button" data-mode="roi">
+            <span class="home-index">03 / DÉFI</span><strong>LE ROI DU TERRAIN</strong><span class="home-description">Filet à hauteur normale + sur-filet.</span>
+            <span class="home-foot"><span>NIVEAUX 2 → 4</span><span class="home-go">COMMENCER ↗</span></span>
+          </button>
+        </div>
+        <div class="rules-strip">
+          <span><b>0 PT</b> Rivière rose</span><span><b>1 PT</b> Au-dessus du sur-filet</span>
+          <span><b>2 PTS</b> En dessous du sur-filet</span><span><b>1 PT</b> Faute adverse</span>
         </div>
       </section>
 
-      <div class="match-layout">
-        <section class="score-panel" aria-labelledby="scoreTitle">
-          <div class="panel-top"><div><p class="kicker">02 / LE MATCH</p><h2 id="scoreTitle">Tableau de score</h2></div><span class="match-counter" id="matchCounter">MATCH 01</span></div>
-          <p class="score-hint">Deux compteurs indépendants : touche la moitié A ou B du terrain, le bon score évolue directement.</p>
-          <div class="scoreboard scoreboard--duo" id="scoreboard">
-            <div class="player-row player-row--a"><div class="player-heading"><span class="player-indicator">A</span><span class="player-name" id="playerLabel0">Joueur 1</span></div><span class="player-score" id="score0" aria-live="polite">0</span></div>
-            <div class="player-row player-row--b"><div class="player-heading"><span class="player-indicator">B</span><span class="player-name" id="playerLabel1">Joueur 2</span></div><span class="player-score" id="score1" aria-live="polite">0</span></div>
+      <section id="poolView" class="view" hidden>
+        <div class="view-navigation"><button type="button" class="back-btn" id="poolBack">← Les 3 situations</button><span class="step-pill">ÉTAPE 2 / 3</span></div>
+        <div class="view-heading"><p class="kicker" id="poolModeKicker">LA BASTON</p><h2>CRÉE TA POULE.</h2><p>Choisis 3 ou 4 joueurs, puis renseigne les prénoms. Chaque joueur rencontrera tous les autres.</p></div>
+        <div class="setup-layout">
+          <div class="setup-card">
+            <h3>1. Combien de joueurs ?</h3>
+            <div class="count-picker" role="group" aria-label="Taille de la poule">
+              <button class="count-button" type="button" data-pool-size="3" aria-pressed="true"><strong>3</strong><span>JOUEURS</span></button>
+              <button class="count-button" type="button" data-pool-size="4" aria-pressed="false"><strong>4</strong><span>JOUEURS</span></button>
+            </div>
+            <h3>2. Les prénoms</h3>
+            <div class="roster-fields" id="rosterFields"></div>
+            <button class="primary-btn start-btn" type="button" id="startButton">ACCÉDER AU TERRAIN <span>↗</span></button>
+            <p class="save-note">Les résultats des poules de 3 et de 4 sont conservés séparément.</p>
           </div>
-          <div class="name-form"><label for="name0">Joueur A <input id="name0" type="text" maxlength="36" autocomplete="off" placeholder="Prénom A"></label><label for="name1">Joueur B <input id="name1" type="text" maxlength="36" autocomplete="off" placeholder="Prénom B"></label></div>
-          <div class="action-grid"><button type="button" class="soft-btn" id="undoButton"><span class="button-symbol">↶</span> Annuler le dernier point</button></div>
-          <p class="fault-heading">POINT GAGNÉ SUR UNE FAUTE ADVERSE</p>
-          <div class="fault-grid"><button type="button" class="secondary-action" data-fault-player="0"><span class="round-icon">A</span><span><strong>+1 pour A</strong><small>Faute de l'adversaire</small></span></button><button type="button" class="secondary-action" data-fault-player="1"><span class="round-icon">B</span><span><strong>+1 pour B</strong><small>Faute de l'adversaire</small></span></button></div>
-          <div class="panel-footer"><button type="button" class="text-btn" id="finishButton">Terminer le match <span>↗</span></button><button type="button" class="text-btn danger-text" id="clearButton">Remettre à zéro</button></div>
-        </section>
-
-        <section class="court-panel" aria-labelledby="courtTitle">
-          <div class="panel-top"><div><p class="kicker">03 / MARQUER UN POINT</p><h2 id="courtTitle">Touche la zone d’impact.</h2></div><span class="court-caption" id="courtCaption">LA BASTON · SANS FILET</span></div>
-          <div class="trajectory-head"><span class="field-label">TRAJECTOIRE DU VOLANT</span><span class="live-hint">La sélection reste active entre les points.</span></div>
-          <div class="trajectory-picker" id="trajectoryPicker" role="group" aria-label="Trajectoire">
-            <button type="button" class="trajectory-btn" data-trajectory="above" aria-pressed="false"><span class="trajectory-symbol trajectory-symbol--high">⌒</span><span><strong>Au-dessus du sur-filet</strong><small>POINT NORMAL</small></span><span class="score-tag">+1</span></button>
-            <button type="button" class="trajectory-btn is-selected" data-trajectory="under" aria-pressed="true"><span class="trajectory-symbol trajectory-symbol--low">↗</span><span><strong>Sous le sur-filet</strong><small>TRAJECTOIRE TENDUE</small></span><span class="score-tag">×2</span></button>
+          <div class="setup-card setup-card--schedule">
+            <p class="kicker">PROGRAMME</p><h3 id="poolPreviewTitle">3 rencontres</h3>
+            <div class="schedule-preview" id="schedulePreview"></div>
+            <div class="setup-explainer"><span class="star">★</span><p>Un match à la fois. Deux compteurs indépendants, puis le match suivant. Tous les points restent dans le bilan.</p></div>
           </div>
-          <div class="court-title-row"><span><span class="mini-circle">◎</span> DEUX ZONES DE COMPTAGE</span><span class="tap-prompt">A À GAUCHE · B À DROITE <span aria-hidden="true">☝</span></span></div>
-          <div class="court-stage" id="courtStage">
-            <svg class="court-svg" id="courtSvg" viewBox="0 0 760 540" role="group" aria-label="Terrain de badminton interactif. Les zones à droite du sur-filet permettent de compter les points.">
-              <defs>
-                <pattern id="netMesh" width="11" height="13" patternUnits="userSpaceOnUse"><path d="M11 0H0V13" fill="none" stroke="#4b5145" stroke-width="1.2"/></pattern>
-                <filter id="courtShadow" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="10" stdDeviation="8" flood-color="#433e31" flood-opacity=".12"/></filter>
-              </defs>
-              <g filter="url(#courtShadow)"><rect x="31" y="47" width="698" height="436" rx="5" fill="#fff"/></g>
-              <g class="hit-area">
-                <rect data-zone="back-top" data-player="0" class="court-zone standard-zone" role="button" tabindex="0" aria-label="Joueur A, zone fond haute, point selon trajectoire" x="40" y="58" width="132" height="207" fill="#EDE6E2"/>
-                <rect data-zone="back-bottom" data-player="0" class="court-zone standard-zone" role="button" tabindex="0" aria-label="Joueur A, zone fond basse, point selon trajectoire" x="40" y="265" width="132" height="207" fill="#EDE6E2"/>
-                <rect data-zone="front-top" data-player="0" class="court-zone standard-zone" role="button" tabindex="0" aria-label="Joueur A, zone avant haute, point selon trajectoire" x="172" y="58" width="128" height="207" fill="#EDE6E2"/>
-                <rect data-zone="front-bottom" data-player="0" class="court-zone standard-zone" role="button" tabindex="0" aria-label="Joueur A, zone avant basse, point selon trajectoire" x="172" y="265" width="128" height="207" fill="#EDE6E2"/>
-                <rect data-zone="river" data-player="0" class="court-zone river-zone" role="button" tabindex="0" aria-label="Joueur A, rivière rose, zéro point" x="300" y="58" width="80" height="414" fill="#F098A5"/>
-                <rect data-zone="river" data-player="1" class="court-zone river-zone" role="button" tabindex="0" aria-label="Joueur B, rivière rose, zéro point" x="380" y="58" width="80" height="414" fill="#F098A5"/>
-                <rect data-zone="front-top" data-player="1" class="court-zone standard-zone" role="button" tabindex="0" aria-label="Joueur B, zone avant haute, point selon trajectoire" x="460" y="58" width="128" height="207" fill="#EDE6E2"/>
-                <rect data-zone="front-bottom" data-player="1" class="court-zone standard-zone" role="button" tabindex="0" aria-label="Joueur B, zone avant basse, point selon trajectoire" x="460" y="265" width="128" height="207" fill="#EDE6E2"/>
-                <rect data-zone="back-top" data-player="1" class="court-zone standard-zone" role="button" tabindex="0" aria-label="Joueur B, zone fond haute, point selon trajectoire" x="588" y="58" width="132" height="207" fill="#EDE6E2"/>
-                <rect data-zone="back-bottom" data-player="1" class="court-zone standard-zone" role="button" tabindex="0" aria-label="Joueur B, zone fond basse, point selon trajectoire" x="588" y="265" width="132" height="207" fill="#EDE6E2"/>
-              </g>
-              <g pointer-events="none" class="court-lines" stroke="#038F51" stroke-width="6" fill="none" stroke-linejoin="round"><rect x="40" y="58" width="680" height="414"/><path d="M40 265H720 M172 58V472 M300 58V472 M460 58V472 M588 58V472"/></g>
-              <g id="netGraphic" pointer-events="none"></g>
-              <g pointer-events="none" class="zone-labels">
-                <text x="340" y="255" text-anchor="middle" transform="rotate(-90 340 255)" class="river-label">RIVIÈRE · 0</text>
-                <text x="420" y="255" text-anchor="middle" transform="rotate(-90 420 255)" class="river-label">RIVIÈRE · 0</text>
-                <text x="106" y="165" text-anchor="middle" class="court-zone-label">FOND</text>
-                <text x="106" y="373" text-anchor="middle" class="court-zone-label">FOND</text>
-                <text x="236" y="165" text-anchor="middle" class="court-zone-label">AVANT</text>
-                <text x="236" y="373" text-anchor="middle" class="court-zone-label">AVANT</text>
-                <text x="526" y="165" text-anchor="middle" class="court-zone-label">AVANT</text>
-                <text x="526" y="373" text-anchor="middle" class="court-zone-label">AVANT</text>
-                <text x="654" y="165" text-anchor="middle" class="court-zone-label">FOND</text>
-                <text x="654" y="373" text-anchor="middle" class="court-zone-label">FOND</text>
-                <text x="208" y="27" text-anchor="middle" class="side-label">POINTS JOUEUR A</text>
-                <text x="550" y="27" text-anchor="middle" class="side-label">POINTS JOUEUR B</text>
-              </g>
-            </svg>
-            <div class="court-feedback" id="courtFeedback" role="status" aria-live="polite"></div>
-          </div>
-          <div class="court-legend"><div><span class="legend-dot legend-dot--pink"></span> Rivière <strong>0 pt</strong></div><div><span class="legend-dot legend-dot--beige"></span> Trajectoire haute <strong>1 pt</strong></div><div><span class="legend-dot legend-dot--green"></span> Trajectoire tendue <strong>2 pts</strong></div></div>
-          <p class="court-note">Chaque moitié sert à compter pour un joueur : côté gauche = A, côté droit = B. Le filet s’adapte à la situation.</p>
-        </section>
-      </div>
-
-      <section class="lower-grid" aria-label="Bilan et historique">
-        <div class="summary-panel"><div class="panel-top"><div><p class="kicker">04 / LE CONTRAT</p><h2>Ma progression</h2></div><span class="small-caption">POINTS CUMULÉS</span></div><div class="contract-grid" id="contractGrid"></div><p class="contract-note" id="contractNote">Les niveaux sont calculés à partir des seuils de tes fiches.</p></div>
-        <div class="history-panel"><div class="panel-top"><div><p class="kicker">05 / LES ACTIONS</p><h2>Historique du match</h2></div><button type="button" class="export-btn" id="exportButton">↓ Export CSV</button></div><div id="historyList" class="history-list" aria-live="polite"></div></div>
+        </div>
       </section>
 
-      <footer class="page-footer"><span>BADMINTON IMPACT · LE BON SAUVEUR — SAINT-LÔ</span><span>Conception pédagogique : L. RIGAUX · Enregistrement local</span></footer>
+      <section id="gameView" class="view" hidden>
+        <div class="view-navigation"><button type="button" class="back-btn" id="gameBack">← Ma poule</button><button type="button" class="back-btn" id="gameHome">Accueil</button></div>
+        <div class="game-heading">
+          <div><p class="kicker" id="gameModeKicker">LA BASTON · SANS FILET</p><h2 id="gameMatchTitle">MATCH 01</h2><p id="gamePairNames">Joueur A · Joueur B</p></div>
+          <div class="round-pill" id="roundBadge">POULE DE 3 · TOUR 1</div>
+        </div>
+        <div class="game-layout">
+          <section class="play-panel" aria-labelledby="scoringTitle">
+            <div class="panel-heading"><div><p class="kicker">QUI MARQUE ?</p><h3 id="scoringTitle">TOUCHE LE JOUEUR.</h3></div></div>
+            <p class="panel-help">Choisis A ou B. Le joueur reste sélectionné jusqu’à ce que tu changes.</p>
+            <div class="live-scores">
+              <button type="button" class="score-card is-active" data-scorer="0" aria-pressed="true"><span class="score-id">A</span><span class="score-details"><strong id="playerName0">Joueur A</strong><small class="selected-text">POINTS POUR CE JOUEUR</small></span><span class="score-number" id="playerScore0">0</span></button>
+              <button type="button" class="score-card" data-scorer="1" aria-pressed="false"><span class="score-id">B</span><span class="score-details"><strong id="playerName1">Joueur B</strong><small class="selected-text">TOUCHER POUR SÉLECTIONNER</small></span><span class="score-number" id="playerScore1">0</span></button>
+            </div>
+            <div class="selected-summary" aria-live="polite"><span class="selected-led"></span> Les points vont à <strong id="selectedName">Joueur A</strong></div>
+            <div class="quick-row"><button type="button" class="fault-btn" id="faultButton"><span>+1</span><span>FAUTE ADVERSE<small>Pour le joueur sélectionné</small></span></button><button type="button" class="undo-btn" id="undoButton">↶ ANNULER</button></div>
+            <div class="match-actions"><button type="button" class="primary-btn finish-btn" id="finishButton">TERMINER LE MATCH <span>↗</span></button><button type="button" class="quiet-btn" id="clearButton">Effacer ce match</button></div>
+          </section>
+
+          <section class="play-panel court-panel" aria-labelledby="courtTitle">
+            <div class="panel-heading"><div><p class="kicker">UN SEUL TOUCHER</p><h3 id="courtTitle">OÙ TOMBE LE VOLANT ?</h3></div><span class="net-pill" id="netPill">SANS FILET</span></div>
+            <p class="panel-help">Dans chaque zone, touche directement <b>+1</b> (au-dessus) ou <b>+2</b> (en dessous du sur-filet).</p>
+            <div class="half-court-shell">
+              <div class="court-info-top"><span>FILET / SUR-FILET</span><span>FOND DU TERRAIN</span></div>
+              <div class="court-area" id="courtArea">
+                <div class="surfilet" aria-hidden="true"></div>
+                <div class="net-edge" id="netEdge" aria-hidden="true"></div>
+                <div class="half-court" role="group" aria-label="Demi-terrain de badminton tactile">
+                  <button type="button" class="river-area" data-zone="river" data-points="0"><span>RIVIÈRE</span><strong>0 PT</strong><small>TOUCHER</small></button>
+                  <div class="court-cell cell-front-top"><span class="cell-title">AVANT · HAUT</span><div class="cell-buttons"><button type="button" class="impact-action impact-one" data-zone="front-top" data-points="1"><strong>+1</strong><small>AU-DESSUS</small></button><button type="button" class="impact-action impact-two" data-zone="front-top" data-points="2"><strong>+2</strong><small>EN DESSOUS</small></button></div></div>
+                  <div class="court-cell cell-back-top"><span class="cell-title">FOND · HAUT</span><div class="cell-buttons"><button type="button" class="impact-action impact-one" data-zone="back-top" data-points="1"><strong>+1</strong><small>AU-DESSUS</small></button><button type="button" class="impact-action impact-two" data-zone="back-top" data-points="2"><strong>+2</strong><small>EN DESSOUS</small></button></div></div>
+                  <div class="court-cell cell-front-bottom"><span class="cell-title">AVANT · BAS</span><div class="cell-buttons"><button type="button" class="impact-action impact-one" data-zone="front-bottom" data-points="1"><strong>+1</strong><small>AU-DESSUS</small></button><button type="button" class="impact-action impact-two" data-zone="front-bottom" data-points="2"><strong>+2</strong><small>EN DESSOUS</small></button></div></div>
+                  <div class="court-cell cell-back-bottom"><span class="cell-title">FOND · BAS</span><div class="cell-buttons"><button type="button" class="impact-action impact-one" data-zone="back-bottom" data-points="1"><strong>+1</strong><small>AU-DESSUS</small></button><button type="button" class="impact-action impact-two" data-zone="back-bottom" data-points="2"><strong>+2</strong><small>EN DESSOUS</small></button></div></div>
+                </div>
+              </div>
+              <div class="court-key"><span><i class="key-pink"></i>Rivière : 0</span><span><i class="key-beige"></i>Au-dessus : +1</span><span><i class="key-lime"></i>En dessous : +2</span></div>
+              <p class="court-warning" id="courtFeedback" role="status" aria-live="polite">Prêt à compter les points.</p>
+            </div>
+          </section>
+        </div>
+        <div class="results-layout">
+          <section class="result-panel"><div class="panel-heading"><div><p class="kicker">TOUTE LA POULE</p><h3>CLASSEMENT & CONTRATS</h3></div><button type="button" class="export-btn" id="exportButton">↓ CSV</button></div><div class="table-scroll"><table class="ranking-table"><thead><tr><th>JOUEUR</th><th>VICT.</th><th>POINTS</th><th>NIVEAU</th></tr></thead><tbody id="rankingBody"></tbody></table></div><p class="contract-note" id="contractNote"></p></section>
+          <section class="result-panel"><div class="panel-heading"><div><p class="kicker">ORDRE DES RENCONTRES</p><h3>MES MATCHS</h3></div></div><div class="match-list" id="matchList"></div><p class="recent-label">DERNIÈRES ACTIONS</p><div class="history-list" id="historyList"></div></section>
+        </div>
+      </section>
+      <footer class="page-footer"><span>BADMINTON IMPACT · LE BON SAUVEUR — SAINT-LÔ</span><span>Conception pédagogique : L. RIGAUX · Données locales</span></footer>
     </main>
   </div>
-
   <dialog id="confirmDialog" class="modal"><form method="dialog" class="dialog-box"><p class="kicker" id="dialogKicker">CONFIRMATION</p><h2 id="dialogTitle">Confirmer ?</h2><p id="dialogText"></p><div class="dialog-actions"><button value="cancel" class="soft-btn">Annuler</button><button value="ok" class="primary-btn" id="dialogConfirm">Confirmer</button></div></form></dialog>
-  <dialog id="helpDialog" class="modal"><form method="dialog" class="dialog-box"><p class="kicker">MODE D'EMPLOI</p><h2>Un toucher = une action.</h2><ol class="help-list"><li>Choisis La Baston, Le Carré magique ou Le Roi du terrain.</li><li>Les deux moitiés du terrain servent au comptage : A à gauche, B à droite.</li><li>Choisis la trajectoire : au-dessus du sur-filet (+1) ou sous le sur-filet (×2).</li><li>Touche une zone du côté du joueur concerné. Dans la rivière, cela fait 0 point.</li><li>Pour une faute adverse, utilise le bouton « +1 pour A » ou « +1 pour B ».</li><li>Termine le match pour conserver les résultats et passer au suivant.</li></ol><p>Chaque situation conserve son historique sur cet appareil. L'export CSV permet d'en garder une copie.</p><div class="dialog-actions"><button value="cancel" class="primary-btn">C'est compris</button></div></form></dialog>
+  <dialog id="helpDialog" class="modal"><form method="dialog" class="dialog-box"><p class="kicker">MODE D'EMPLOI</p><h2>Une zone, un toucher.</h2><ol class="help-list"><li>Choisis l'une des trois situations.</li><li>Choisis une poule de 3 ou de 4 joueurs, puis saisis les prénoms.</li><li>Sur le terrain, touche d'abord le joueur qui marque (A ou B). Il reste sélectionné.</li><li>Dans la zone d'impact du demi-terrain, touche directement « +1 au-dessus » ou « +2 en dessous ». Rivière : 0 point.</li><li>Une faute adverse ajoute 1 point au joueur sélectionné.</li><li>Termine le match pour passer automatiquement à la rencontre suivante. Le classement et les niveaux se mettent à jour.</li></ol><p>Chaque poule conserve ses résultats sur cet appareil. L'export CSV permet de garder une copie.</p><div class="dialog-actions"><button value="cancel" class="primary-btn">C'est compris</button></div></form></dialog>
 </body>
 </html>
