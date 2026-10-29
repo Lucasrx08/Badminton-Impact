@@ -256,7 +256,7 @@
     const pair = activePair();
     const accepted = await askConfirmation({
       kicker:'FIN DE RENCONTRE', title:'Enregistrer les points ?',
-      message:`${playerName(pair[0])} : ${s.scores[0]} pts. ${playerName(pair[1])} : ${s.scores[1]} pts. Tu passeras au match suivant.`,
+      message:`${playerName(pair[0])} : ${s.scores[0]} ${s.scores[0] === 1 ? 'point' : 'points'}. ${playerName(pair[1])} : ${s.scores[1]} ${s.scores[1] === 1 ? 'point' : 'points'}. Tu passeras au match suivant.`,
       label:'Enregistrer et continuer'
     });
     if (!accepted) return;
