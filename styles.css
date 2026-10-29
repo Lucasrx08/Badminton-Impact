@@ -110,3 +110,20 @@ main{padding-top:26px}.view{animation:appear .22s ease-out}@keyframes appear{fro
 .court-visual-shell .court-warning{margin-top:8px}
 @media(max-width:900px){.court-visual-shell{padding:9px 10px 12px}.court-visual-meta{font-size:9px}.court-svg-3d{max-width:none}}
 @media(max-width:650px){.court-visual-shell{padding:8px 4px 10px;border-radius:14px}.court-visual-meta{padding:2px 7px;letter-spacing:.035em}.court-visual-meta span:last-child{display:none}.court-visual-scroller{overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-color:#bbc992 transparent;scrollbar-width:thin}.court-svg-3d{width:640px;max-width:none}.court-visual-shell .court-key{padding:9px 4px 0;gap:8px}.court-visual-shell .court-key span{font-size:10px}.court-visual-shell .court-warning{font-size:11px}.court-visual-scroller::after{content:"Glisse pour voir tout le terrain →";display:block;color:#73895e;font-size:10px;font-weight:850;text-align:center;padding:4px}}
+
+/* V5 — deux trajectoires sur un seul rectangle de demi-terrain */
+.court-svg-3d{cursor:pointer}
+.court-svg-3d .scene-miss-zone,.court-svg-3d .net-miss-zone,.court-svg-3d .trajectory-touch,.court-svg-3d .fault-visual-hotspot{cursor:pointer;outline:none}
+.court-svg-3d .trajectory-touch .trajectory-line{transition:stroke-width .15s,stroke .15s}
+.court-svg-3d .trajectory-touch:hover .trajectory-line,.court-svg-3d .trajectory-touch:focus-visible .trajectory-line{stroke-width:12;stroke:#018d51}
+.court-svg-3d .trajectory-touch:hover rect,.court-svg-3d .trajectory-touch:focus-visible rect{stroke:#2b8e59;stroke-width:6}
+.court-svg-3d .trajectory-touch:active rect{stroke:#b17a30;stroke-width:7}
+.court-svg-3d .trajectory-score{font:900 38px Impact,"Arial Black",sans-serif;fill:#34462f}
+.court-svg-3d .trajectory-caption{font:900 13px ui-sans-serif,system-ui,sans-serif;fill:#526148;letter-spacing:.04em}
+.court-svg-3d .fault-visual-title{font:900 17px Impact,"Arial Black",sans-serif;fill:#875c4a;letter-spacing:.09em}
+.court-svg-3d .fault-visual-sub{font:950 13px ui-sans-serif,system-ui,sans-serif;fill:#a05d4b;letter-spacing:.03em}
+.court-svg-3d .fault-visual-hotspot:hover rect,.court-svg-3d .fault-visual-hotspot:focus-visible rect{stroke:#d48156;stroke-width:6}
+.court-svg-3d .fault-visual-hotspot:active rect{fill:#f3d5c2}
+.court-svg-3d .river-3d.is-last polygon{stroke:#c75875;stroke-width:6}
+.court-svg-3d .trajectory-touch.is-last rect{stroke:#df9e44;stroke-width:5}
+@media(max-width:650px){.court-svg-3d{width:700px}}
