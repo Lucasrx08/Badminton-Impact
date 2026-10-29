@@ -1,0 +1,14 @@
+{
+  "name": "Badminton Impact — EPS Lucas Rigaux",
+  "short_name": "Bad'Impact",
+  "description": "Compteur de points interactif pour La Baston, Le Carré magique et Le Roi du terrain.",
+  "lang": "fr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F7F6F2",
+  "theme_color": "#B4D01A",
+  "icons": [
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
