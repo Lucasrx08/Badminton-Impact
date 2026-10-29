@@ -82,3 +82,31 @@ main{padding-top:26px}.view{animation:appear .22s ease-out}@keyframes appear{fro
 }
 @media(max-width:360px){.intro h2{font-size:31px}.home-card strong{font-size:28px}.score-details strong{font-size:11px}.impact-action{gap:3px}.impact-action small{font-size:7px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* Badminton Impact · terrain en perspective 3D fidèle aux schémas EPS. */
+.court-visual-shell{margin-top:14px;border:1px solid #dde5d5;border-radius:21px;padding:12px 13px 14px;background:linear-gradient(145deg,#fcfdfa,#f0f5ec);box-shadow:inset 0 2px 10px #2c5d2b0b;overflow:hidden}
+.court-visual-meta{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#677a5f;font-size:10px;font-weight:950;letter-spacing:.08em;margin:4px 9px 7px}
+.court-visual-meta span:first-child{display:flex;align-items:center;gap:7px}.visual-dot{width:8px;height:8px;background:var(--lime);border:1px solid #87a50b;border-radius:50%;display:inline-block}
+.court-visual-meta span:last-child{color:#968769}
+.court-visual-scroller{width:100%;overflow:visible;border-radius:15px}
+.court-svg-3d{display:block;width:100%;height:auto;max-width:1080px;margin:0 auto;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.court-svg-3d .river-3d,.court-svg-3d .point-pad{cursor:pointer;outline:none}
+.court-svg-3d .river-3d polygon{transition:fill .16s,stroke-width .16s}
+.court-svg-3d .river-3d:hover polygon{fill:#f7aab4;stroke-width:5}
+.court-svg-3d .river-3d:focus-visible polygon{stroke:#e7a64c;stroke-width:8}
+.court-svg-3d .point-pad rect{transition:filter .15s,stroke-width .15s}
+.court-svg-3d .point-pad:hover rect{filter:url(#padShade) brightness(1.08);stroke:#408e56;stroke-width:4}
+.court-svg-3d .point-pad:focus-visible rect{stroke:#df9c42;stroke-width:7}
+.court-svg-3d .point-pad:active rect{stroke:#2f863d;stroke-width:6}
+.court-svg-3d .river-3d-label{font:900 20px Impact,"Arial Black",sans-serif;fill:#743f51;letter-spacing:.09em}
+.court-svg-3d .rope-title{font:900 15px Impact,"Arial Black",sans-serif;fill:#f6fb65;letter-spacing:.13em}
+.court-svg-3d .net-height-label{font:900 12px ui-sans-serif,system-ui,sans-serif;fill:#778873;letter-spacing:.08em}
+.court-svg-3d .zone-3d-caption{font:900 12px ui-sans-serif,system-ui,sans-serif;fill:#82927b;letter-spacing:.06em}
+.court-svg-3d .pad-number{font:900 33px Impact,"Arial Black",sans-serif;fill:#3a4934}
+.court-svg-3d .pad-caption{font:900 9px ui-sans-serif,system-ui,sans-serif;fill:#526148;letter-spacing:.02em}
+.court-svg-3d .court-foot-caption{font:900 12px ui-sans-serif,system-ui,sans-serif;fill:#799080;letter-spacing:.13em}
+.court-visual-shell .court-key{margin:0 0 3px;gap:13px}
+.court-visual-shell .court-key span{font-size:11px}.court-visual-shell .court-key b{color:#3e4f3d}
+.court-visual-shell .court-warning{margin-top:8px}
+@media(max-width:900px){.court-visual-shell{padding:9px 10px 12px}.court-visual-meta{font-size:9px}.court-svg-3d{max-width:none}}
+@media(max-width:650px){.court-visual-shell{padding:8px 4px 10px;border-radius:14px}.court-visual-meta{padding:2px 7px;letter-spacing:.035em}.court-visual-meta span:last-child{display:none}.court-visual-scroller{overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-color:#bbc992 transparent;scrollbar-width:thin}.court-svg-3d{width:640px;max-width:none}.court-visual-shell .court-key{padding:9px 4px 0;gap:8px}.court-visual-shell .court-key span{font-size:10px}.court-visual-shell .court-warning{font-size:11px}.court-visual-scroller::after{content:"Glisse pour voir tout le terrain →";display:block;color:#73895e;font-size:10px;font-weight:850;text-align:center;padding:4px}}
