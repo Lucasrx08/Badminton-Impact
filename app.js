@@ -1,316 +1,359 @@
-/* Badminton Impact — Lucas Rigaux. Aucune donnée n'est envoyée à un serveur. */
-(() => {
+/* Badminton Impact V2 — EPS · L. RIGAUX — données locales. */
+(function badmintonAppV2(){
   'use strict';
 
-  const STORAGE_KEY = 'rigaux-badminton-impact-v1';
+  const STORE_V2 = 'rigaux-badminton-impact-v2';
+  const STORE_V1 = 'rigaux-badminton-impact-v1';
   const MODES = {
-    baston: { label: 'LA BASTON', net: 'SANS FILET', levels: [{level: 1, minExclusive: 30}, {level: 2, minExclusive: 40}] },
-    carre: { label: 'LE CARRÉ MAGIQUE', net: 'FILET ABAISSÉ', levels: [{level: 1, minExclusive: 40}, {level: 2, minExclusive: 50}, {level: 3, minExclusive: 60}] },
-    roi: { label: 'LE ROI DU TERRAIN', net: 'FILET NORMAL', levels: [{level: 2, minExclusive: 60}, {level: 3, minExclusive: 70}, {level: 4, minExclusive: 80}] }
+    baston: { label: 'LA BASTON', net: 'SANS FILET', levels: [{ level: 1, min: 30 }, { level: 2, min: 40 }] },
+    carre: { label: 'LE CARRÉ MAGIQUE', net: 'FILET ABAISSÉ', levels: [{ level: 1, min: 40 }, { level: 2, min: 50 }, { level: 3, min: 60 }] },
+    roi: { label: 'LE ROI DU TERRAIN', net: 'FILET NORMAL', levels: [{ level: 2, min: 60 }, { level: 3, min: 70 }, { level: 4, min: 80 }] }
   };
-  const ZONE_NAMES = {
-    river: 'Rivière',
-    'front-top': 'Avant haut',
-    'front-bottom': 'Avant bas',
-    'back-top': 'Fond haut',
-    'back-bottom': 'Fond bas',
-    fault: 'Faute adverse',
-    missed: 'Faute personnelle'
+  const ZONES = {
+    river: 'Rivière', 'front-top': 'Avant haut', 'front-bottom': 'Avant bas',
+    'back-top': 'Fond haut', 'back-bottom': 'Fond bas', fault: 'Faute adverse'
   };
-
-  const makeSession = () => ({ matchNumber: 1, scores: [0, 0], events: [], completed: [] });
-  const defaults = () => ({
-    version: 1,
-    players: ['Joueur 1', 'Joueur 2'],
-    mode: 'baston',
-    trajectory: 'above',
-    sessions: { baston: makeSession(), carre: makeSession(), roi: makeSession() }
+  const LETTERS = 'ABCD';
+  const PAIRS = { 3: [[0,1],[0,2],[1,2]], 4: [[0,1],[2,3],[0,2],[1,3],[0,3],[1,2]] };
+  const $ = id => document.getElementById(id);
+  const makeSession = size => ({
+    players: Array.from({length:size}, (_,i)=>`Joueur ${LETTERS[i]}`),
+    matchNumber: 1, scores: [0,0], selectedScorer: 0, events: [], completed: [], pairOverride: null
+  });
+  const defaultState = () => ({
+    version: 2,
+    sessions: Object.fromEntries(Object.keys(MODES).map(mode => [mode, {'3':makeSession(3),'4':makeSession(4)}]))
   });
 
+  function safeNumber(x) { return Number.isFinite(Number(x)) ? Math.max(0,Number(x)) : 0; }
+  function restoreSession(s, size) {
+    const base = makeSession(size);
+    if (!s || typeof s !== 'object') return base;
+    base.players = base.players.map((name,i) => typeof s.players?.[i] === 'string' ? s.players[i].slice(0,36) : name);
+    base.matchNumber = Number.isInteger(s.matchNumber) && s.matchNumber > 0 ? s.matchNumber : 1;
+    base.scores = [safeNumber(s.scores?.[0]), safeNumber(s.scores?.[1])];
+    base.selectedScorer = s.selectedScorer === 1 ? 1 : 0;
+    base.events = Array.isArray(s.events) ? s.events.slice(-1000) : [];
+    base.completed = Array.isArray(s.completed) ? s.completed.slice(-500) : [];
+    if (Array.isArray(s.pairOverride) && s.pairOverride.every(i => Number.isInteger(i) && i >= 0 && i < size) && s.pairOverride.length === 2) {
+      base.pairOverride = [...s.pairOverride];
+    }
+    return base;
+  }
   function loadState() {
     try {
-      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
-      if (!saved || saved.version !== 1 || !saved.sessions) return defaults();
-      const state = defaults();
-      if (Array.isArray(saved.players) && saved.players.length === 2) {
-        state.players = saved.players.map((s, i) => typeof s === 'string' ? s.slice(0, 36) : `Joueur ${i + 1}`);
+      const saved = JSON.parse(localStorage.getItem(STORE_V2) || 'null');
+      if (saved?.version === 2 && saved.sessions) {
+        const result = defaultState();
+        Object.keys(MODES).forEach(mode => {
+          [3,4].forEach(size => {
+            result.sessions[mode][size] = restoreSession(saved.sessions[mode]?.[size],size);
+          });
+        });
+        return result;
       }
-      if (MODES[saved.mode]) state.mode = saved.mode;
-      if (['above', 'under'].includes(saved.trajectory)) state.trajectory = saved.trajectory;
-      for (const mode of Object.keys(MODES)) {
-        const entry = saved.sessions[mode];
-        if (!entry || !Array.isArray(entry.events) || !Array.isArray(entry.completed) || !Array.isArray(entry.scores)) continue;
-        state.sessions[mode] = {
-          matchNumber: Number.isInteger(entry.matchNumber) && entry.matchNumber > 0 ? entry.matchNumber : 1,
-          scores: entry.scores.map(x => Number.isFinite(Number(x)) ? Math.max(0, Number(x)) : 0).slice(0, 2),
-          events: entry.events.slice(-2000),
-          completed: entry.completed.slice(-200)
-        };
+      const old = JSON.parse(localStorage.getItem(STORE_V1) || 'null');
+      if (old?.version === 1 && old.sessions) {
+        const migrated = defaultState();
+        Object.keys(MODES).forEach(mode => {
+          const entry = old.sessions[mode];
+          if (!entry) return;
+          const s = migrated.sessions[mode]['3'];
+          s.players[0] = old.players?.[0] || s.players[0];
+          s.players[1] = old.players?.[1] || s.players[1];
+          s.matchNumber = Number.isInteger(entry.matchNumber) && entry.matchNumber > 0 ? entry.matchNumber : 1;
+          s.scores = [safeNumber(entry.scores?.[0]), safeNumber(entry.scores?.[1])];
+          s.events = Array.isArray(entry.events) ? entry.events.slice(-1000) : [];
+          s.completed = Array.isArray(entry.completed) ? entry.completed.map(match => ({
+            ...match, pair: [0,1]
+          })) : [];
+          if (s.events.length || s.scores.some(Boolean)) s.pairOverride = [0,1];
+        });
+        return migrated;
       }
-      return state;
-    } catch (error) {
-      return defaults();
-    }
+    } catch (e) { /* Une sauvegarde illisible n'empêche pas de jouer. */ }
+    return defaultState();
   }
 
   let state = loadState();
+  let selectedMode = null;
+  let selectedSize = 3;
+  let currentView = 'home';
   let feedbackTimer = 0;
-  const $ = id => document.getElementById(id);
-  const current = () => state.sessions[state.mode];
-  const playerName = i => state.players[i].trim() || `Joueur ${i + 1}`;
+  const current = () => state.sessions[selectedMode][selectedSize];
+  const playerName = index => current().players[index]?.trim() || `Joueur ${LETTERS[index]}`;
+  const pairings = () => PAIRS[selectedSize];
+  const activePair = () => current().pairOverride || pairings()[(current().matchNumber - 1) % pairings().length];
 
   function persist() {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
-    catch (error) { showFeedback('Stockage indisponible', true); }
+    try { localStorage.setItem(STORE_V2,JSON.stringify(state)); }
+    catch(e) { if(currentView === 'game') feedback('Sauvegarde indisponible'); }
+  }
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+  }
+  function navigate(view) {
+    currentView = view;
+    ['home','pool','game'].forEach(name => { $(name+'View').hidden = view !== name; });
+    window.scrollTo(0,0);
+    if (view === 'pool') renderPool();
+    if (view === 'game') renderGame();
   }
 
-  function esc(value) {
-    return String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  function renderPool() {
+    if (!selectedMode) return;
+    $('poolModeKicker').textContent = MODES[selectedMode].label;
+    document.querySelectorAll('[data-pool-size]').forEach(btn => btn.setAttribute('aria-pressed',String(Number(btn.dataset.poolSize) === selectedSize)));
+    const s = current();
+    $('rosterFields').innerHTML = s.players.map((name,i) =>
+      `<label class="roster-field"><span class="roster-letter">${LETTERS[i]}</span><input type="text" maxlength="36" data-roster-index="${i}" value="${escapeHtml(name)}" aria-label="Prénom du joueur ${LETTERS[i]}"></label>`
+    ).join('');
+    const p = pairings();
+    $('poolPreviewTitle').textContent = `${p.length} rencontres par tour`;
+    $('schedulePreview').innerHTML = p.map((pair,i) =>
+      `<div class="preview-row"><span>MATCH ${String(i+1).padStart(2,'0')}</span><span>${LETTERS[pair[0]]} · ${escapeHtml(playerName(pair[0]))} <b>VS</b> ${LETTERS[pair[1]]} · ${escapeHtml(playerName(pair[1]))}</span></div>`
+    ).join('');
   }
 
-  function computeLevel(score, mode) {
-    let highest = null;
-    for (const limit of MODES[mode].levels) {
-      // « Plus de 30 » signifie strictement supérieur à 30.
-      if (score > limit.minExclusive) highest = limit.level;
-    }
-    return highest;
+  function scoreLevel(points) {
+    let level = null;
+    MODES[selectedMode].levels.forEach(rule => { if (points > rule.min) level = rule.level; });
+    return level;
   }
-
-  function totalPoints(mode, player) {
-    const session = state.sessions[mode];
-    return session.scores[player] + session.completed.reduce((sum, match) => sum + (Number(match.scores?.[player]) || 0), 0);
+  function playerTotals() {
+    const s = current();
+    const totals = s.players.map(() => ({points:0,wins:0,played:0}));
+    s.completed.forEach(match => {
+      const pair = Array.isArray(match.pair) ? match.pair : [0,1];
+      if (!totals[pair[0]] || !totals[pair[1]]) return;
+      const a = safeNumber(match.scores?.[0]);
+      const b = safeNumber(match.scores?.[1]);
+      totals[pair[0]].points += a;
+      totals[pair[1]].points += b;
+      totals[pair[0]].played++;
+      totals[pair[1]].played++;
+      if (a > b) totals[pair[0]].wins++;
+      if (b > a) totals[pair[1]].wins++;
+    });
+    const pair = activePair();
+    totals[pair[0]].points += s.scores[0];
+    totals[pair[1]].points += s.scores[1];
+    return totals;
   }
-
-  function renderNet() {
-    const base = '<text x="365" y="35" text-anchor="middle" fill="#868c18" font-size="15" font-weight="950" letter-spacing="1">SUR-FILET</text>';
-    let mesh = '';
-    if (state.mode === 'baston') {
-      mesh = '<line x1="379" y1="54" x2="379" y2="476" stroke="#e7df12" stroke-width="10" stroke-linecap="round"/><line x1="379" y1="54" x2="379" y2="476" stroke="#fff69c" stroke-width="3"/>';
-    } else if (state.mode === 'carre') {
-      mesh = '<rect x="370" y="58" width="20" height="414" fill="url(#netMesh)" opacity=".63"/><line x1="377" y1="58" x2="377" y2="472" stroke="#555d54" stroke-width="3"/><line x1="362" y1="54" x2="362" y2="476" stroke="#e8df1b" stroke-width="8" stroke-linecap="round"/>';
-    } else {
-      mesh = '<rect x="364" y="58" width="31" height="414" fill="url(#netMesh)" opacity=".9"/><line x1="378" y1="58" x2="378" y2="472" stroke="#293d33" stroke-width="5"/><line x1="350" y1="54" x2="350" y2="476" stroke="#e8df1b" stroke-width="8" stroke-linecap="round"/>';
-    }
-    $('netGraphic').innerHTML = base + mesh;
-  }
-
   function renderScores() {
-    const session = current();
-    $('matchCounter').textContent = `MATCH ${String(session.matchNumber).padStart(2, '0')}`;
-    [0, 1].forEach(i => {
-      $('score' + i).textContent = session.scores[i];
-      $('playerLabel' + i).textContent = playerName(i);
+    const s = current();
+    const pair = activePair();
+    const round = Math.floor((s.matchNumber - 1) / pairings().length) + 1;
+    $('gameModeKicker').textContent = `${MODES[selectedMode].label} · ${MODES[selectedMode].net}`;
+    $('gameMatchTitle').textContent = `MATCH ${String(s.matchNumber).padStart(2,'0')}`;
+    $('gamePairNames').textContent = `${playerName(pair[0])} contre ${playerName(pair[1])}`;
+    $('roundBadge').textContent = `POULE DE ${selectedSize} · TOUR ${round}`;
+    [0,1].forEach(slot => {
+      $('playerName'+slot).textContent = playerName(pair[slot]);
+      $('playerScore'+slot).textContent = s.scores[slot];
+      const button = document.querySelector(`[data-scorer="${slot}"]`);
+      const active = s.selectedScorer === slot;
+      button.classList.toggle('is-active',active);
+      button.setAttribute('aria-pressed',String(active));
+      button.querySelector('.selected-text').textContent = active ? 'POINTS POUR CE JOUEUR' : 'TOUCHER POUR SÉLECTIONNER';
     });
-    $('name0').value = state.players[0];
-    $('name1').value = state.players[1];
-    $('undoButton').disabled = session.events.length === 0;
-    $('finishButton').disabled = session.events.length === 0;
-  }
-
-  function renderModes() {
-    document.querySelectorAll('[data-mode]').forEach(button => {
-      const selected = button.dataset.mode === state.mode;
-      button.setAttribute('aria-pressed', String(selected));
-    });
-    const mode = MODES[state.mode];
-    $('courtCaption').textContent = `${mode.label} · ${mode.net}`;
-  }
-
-  function renderTrajectory() {
-    document.querySelectorAll('[data-trajectory]').forEach(button => {
-      const active = button.dataset.trajectory === state.trajectory;
-      button.classList.toggle('is-selected', active);
-      button.setAttribute('aria-pressed', String(active));
-    });
-    // On colore temporairement le terrain selon l'action précédente, sans modifier les règles.
-    const last = current().events.at(-1);
-    document.querySelectorAll('.court-zone').forEach(zone => {
-      const isLast = Boolean(last && last.zone === zone.dataset.zone && last.player === Number(zone.dataset.player));
-      zone.classList.toggle('is-last', isLast);
-      if (zone.dataset.zone !== 'river') zone.setAttribute('fill', isLast && last.points === 2 ? '#B4D01A' : '#EDE6E2');
+    $('selectedName').textContent = playerName(pair[s.selectedScorer]);
+    $('undoButton').disabled = s.events.length === 0;
+    $('finishButton').disabled = s.events.length === 0;
+    const edge = $('netEdge');
+    edge.className = `net-edge ${selectedMode === 'baston' ? 'net-none' : selectedMode === 'carre' ? 'net-low' : 'net-normal'}`;
+    $('netPill').textContent = MODES[selectedMode].net;
+    const last = s.events.at(-1);
+    document.querySelectorAll('[data-zone][data-points]').forEach(button => {
+      const isLast = Boolean(last && last.zone === button.dataset.zone && last.points === Number(button.dataset.points));
+      button.classList.toggle('is-last',isLast);
     });
   }
-
-  function renderContract() {
-    const content = [0, 1].map(i => {
-      const points = totalPoints(state.mode, i);
-      const level = computeLevel(points, state.mode);
-      return `<article class="contract-card"><div class="contract-initial">${i === 0 ? 'A' : 'B'}</div><div><div class="contract-name" title="${esc(playerName(i))}">${esc(playerName(i))}</div><div class="contract-points">${points} points cumulés</div><div class="contract-level">${level === null ? 'EN COURS' : `NIVEAU ${level}`}</div></div></article>`;
+  function renderRanking() {
+    const totals = playerTotals();
+    const rank = totals.map((t,i) => ({...t,i})).sort((a,b)=>b.wins-a.wins || b.points-a.points || a.i-b.i);
+    $('rankingBody').innerHTML = rank.map(({i,wins,points}) => {
+      const level = scoreLevel(points);
+      return `<tr><td class="rank-name">${LETTERS[i]} · ${escapeHtml(playerName(i))}</td><td>${wins}</td><td>${points}</td><td class="rank-level">${level === null ? '—' : `N${level}`}</td></tr>`;
     }).join('');
-    $('contractGrid').innerHTML = content;
-    const limits = MODES[state.mode].levels.map(item => `N${item.level} : > ${item.minExclusive} pts`).join(' · ');
-    $('contractNote').textContent = `${limits}. Les points sont cumulés dans cette situation (matchs terminés + match en cours).`;
+    $('contractNote').textContent = MODES[selectedMode].levels.map(rule => `N${rule.level} : plus de ${rule.min} pts`).join(' · ') + ' · Points cumulés dans cette poule.';
   }
-
+  function renderMatches() {
+    const s = current();
+    const first = Math.floor((s.matchNumber-1)/pairings().length)*pairings().length + 1;
+    $('matchList').innerHTML = pairings().map((pair,i) => {
+      const num = first+i;
+      const done = s.completed.find(match => match.number === num);
+      const isCurrent = s.matchNumber === num;
+      const players = `${LETTERS[pair[0]]} · ${escapeHtml(playerName(pair[0]))} / ${LETTERS[pair[1]]} · ${escapeHtml(playerName(pair[1]))}`;
+      return `<div class="match-entry ${isCurrent?'is-current':''} ${done?'is-done':''}"><span><strong>${String(num).padStart(2,'0')}</strong> ${players}</span><small>${done ? `${safeNumber(done.scores?.[0])} – ${safeNumber(done.scores?.[1])}` : isCurrent ? 'EN COURS' : 'À VENIR'}</small></div>`;
+    }).join('');
+  }
   function renderHistory() {
-    const events = current().events.slice(-7).reverse();
-    if (!events.length) {
-      $('historyList').innerHTML = '<div class="history-empty">Aucune action pour le moment.<br>Touche une zone du terrain pour commencer.</div>';
-      return;
-    }
-    $('historyList').innerHTML = events.map(event => {
-      const name = event.playerName || playerName(event.player);
-      const description = event.kind === 'fault' ? 'Faute adverse' : `${ZONE_NAMES[event.zone] || 'Zone du terrain'} · ${event.trajectory === 'under' ? 'Trajectoire tendue' : 'Trajectoire haute'}`;
-      const badge = event.points === 2 ? 'bonus' : event.points === 0 ? 'zero' : '';
-      return `<div class="history-item"><div><div class="history-actor">${esc(name)}</div><div class="history-info">${esc(description)}</div></div><span class="history-info">${esc(event.time || '')}</span><span class="history-points ${badge}">+${event.points}</span></div>`;
-    }).join('');
+    const recent = current().events.slice(-5).reverse();
+    $('historyList').innerHTML = recent.length ? recent.map(event => {
+      const label = event.kind === 'fault' ? 'Faute adverse' : `${ZONES[event.zone] || 'Zone'} · ${event.points === 2 ? 'Sous le sur-filet' : event.points === 1 ? 'Au-dessus du sur-filet' : 'Rivière'}`;
+      return `<div class="history-item"><span><strong>${escapeHtml(event.playerName || 'Joueur')}</strong> · ${escapeHtml(label)}</span><span class="history-points ${event.points === 0?'zero':''}">+${event.points}</span></div>`;
+    }).join('') : '<div class="history-empty">Touche une zone pour compter le premier point.</div>';
   }
-
-  function render() {
-    renderModes();
+  function renderGame() {
+    if (!selectedMode) return;
     renderScores();
-    renderTrajectory();
-    renderNet();
-    renderContract();
+    renderRanking();
+    renderMatches();
     renderHistory();
   }
 
-  function showFeedback(text, warning = false) {
-    const el = $('courtFeedback');
+  function feedback(message) {
     clearTimeout(feedbackTimer);
-    el.textContent = text;
-    el.style.background = warning ? '#995661' : '#304226';
-    el.classList.add('show');
-    feedbackTimer = setTimeout(() => el.classList.remove('show'), 1600);
+    const element = $('courtFeedback');
+    element.textContent = message;
+    element.classList.add('flash');
+    feedbackTimer = setTimeout(()=>element.classList.remove('flash'),1300);
   }
-
-  function addAction(zone, player, kind = 'direct') {
-    if (kind !== 'fault' && !ZONE_NAMES[zone]) return;
-    if (player !== 0 && player !== 1) return;
-    const points = kind === 'fault' ? 1 : (zone === 'river' ? 0 : (state.trajectory === 'under' ? 2 : 1));
+  function addAction(zone,points,kind='direct') {
+    if (!ZONES[zone] || ![0,1,2].includes(points)) return;
+    if (kind === 'fault' && points !== 1) return;
+    if (zone === 'river' && points !== 0) return;
+    const s = current();
+    const pair = activePair();
+    const slot = s.selectedScorer;
     const now = new Date();
-    const event = {
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-      player,
-      playerName: playerName(player),
-      points,
-      zone,
-      kind,
-      trajectory: state.trajectory,
-      time: now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
-      date: now.toISOString()
+    const action = {
+      id: `${now.getTime()}-${Math.random().toString(36).slice(2,8)}`,
+      player: slot, playerIndex: pair[slot], playerName: playerName(pair[slot]),
+      points, zone, kind, trajectory: points === 2 ? 'under' : 'above',
+      time: now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}), date: now.toISOString()
     };
-    current().events.push(event);
-    current().scores[player] += points;
+    s.events.push(action);
+    s.scores[slot] += points;
     persist();
-    render();
-    showFeedback(points === 0 ? `JOUEUR ${player === 0 ? 'A' : 'B'} · RIVIÈRE · 0 PT` : `JOUEUR ${player === 0 ? 'A' : 'B'} · +${points} POINT${points > 1 ? 'S' : ''} !`);
+    renderGame();
+    feedback(`${playerName(pair[slot])} · +${points} ${points===1?'point':'points'} !`);
   }
-
   function undoLast() {
-    const session = current();
-    const removed = session.events.pop();
-    if (!removed) return;
-    session.scores[removed.player] = Math.max(0, session.scores[removed.player] - removed.points);
-    persist(); render(); showFeedback('DERNIÈRE ACTION ANNULÉE');
+    const s = current();
+    const item = s.events.pop();
+    if (!item) return;
+    s.scores[item.player] = Math.max(0,s.scores[item.player]-item.points);
+    persist(); renderGame(); feedback('Dernière action annulée');
   }
-
-  function confirmAction({ kicker = 'CONFIRMATION', title, message, label = 'Confirmer' }) {
+  function askConfirmation({kicker='CONFIRMATION',title,message,label='Confirmer'}) {
+    const dialog = $('confirmDialog');
+    if (!dialog?.showModal) return Promise.resolve(window.confirm(message));
+    $('dialogKicker').textContent = kicker;
+    $('dialogTitle').textContent = title;
+    $('dialogText').textContent = message;
+    $('dialogConfirm').textContent = label;
     return new Promise(resolve => {
-      const dialog = $('confirmDialog');
-      $('dialogKicker').textContent = kicker;
-      $('dialogTitle').textContent = title;
-      $('dialogText').textContent = message;
-      $('dialogConfirm').textContent = label;
-      const done = () => resolve(dialog.returnValue === 'ok');
-      dialog.addEventListener('close', done, { once: true });
+      dialog.addEventListener('close',()=>resolve(dialog.returnValue === 'ok'),{once:true});
       dialog.showModal();
     });
   }
-
   async function finishMatch() {
-    const session = current();
-    if (!session.events.length) return;
-    const confirmed = await confirmAction({
-      kicker: 'FIN DE MATCH', title: 'Enregistrer cette rencontre ?',
-      message: `${playerName(0)} : ${session.scores[0]} points · ${playerName(1)} : ${session.scores[1]} points. Les points seront conservés dans le cumul de ${MODES[state.mode].label}.`,
-      label: 'Enregistrer le match'
+    const s = current();
+    if (!s.events.length) return;
+    const pair = activePair();
+    const accepted = await askConfirmation({
+      kicker:'FIN DE RENCONTRE', title:'Enregistrer les points ?',
+      message:`${playerName(pair[0])} : ${s.scores[0]} pts. ${playerName(pair[1])} : ${s.scores[1]} pts. Tu passeras au match suivant.`,
+      label:'Enregistrer et continuer'
     });
-    if (!confirmed) return;
-    session.completed.push({
-      number: session.matchNumber,
-      players: [...state.players],
-      scores: [...session.scores],
-      events: session.events.map(x => ({ ...x })),
-      finishedAt: new Date().toISOString()
+    if (!accepted) return;
+    s.completed.push({
+      number:s.matchNumber, pair:[...pair], scores:[...s.scores],
+      events:s.events.map(item=>({...item})), finishedAt:new Date().toISOString()
     });
-    session.matchNumber += 1;
-    session.scores = [0, 0];
-    session.events = [];
-    persist(); render(); showFeedback('MATCH ENREGISTRÉ ✓');
+    s.matchNumber++;
+    s.scores=[0,0];
+    s.events=[];
+    s.pairOverride=null;
+    s.selectedScorer=0;
+    persist(); renderGame(); feedback('Match enregistré ✓');
   }
-
   async function clearMatch() {
-    const session = current();
-    if (!session.events.length && session.scores.every(x => x === 0)) return;
-    const confirmed = await confirmAction({
-      kicker: 'REMISE À ZÉRO', title: 'Effacer le match en cours ?',
-      message: 'Les actions et les scores de ce match seront effacés. Les rencontres déjà terminées resteront enregistrées.',
-      label: 'Effacer ce match'
+    const s = current();
+    if (!s.events.length && s.scores.every(x=>x===0)) return;
+    const accepted = await askConfirmation({
+      kicker:'REMISE À ZÉRO',title:'Effacer ce match ?',
+      message:'Les actions du match en cours seront supprimées. Les résultats des matchs terminés seront conservés.',
+      label:'Effacer ce match'
     });
-    if (!confirmed) return;
-    session.scores = [0, 0]; session.events = [];
-    persist(); render(); showFeedback('MATCH REMIS À ZÉRO');
+    if (!accepted) return;
+    s.scores=[0,0]; s.events=[];
+    persist(); renderGame(); feedback('Match remis à zéro');
   }
-
-  function csvCell(value) { return `"${String(value ?? '').replace(/"/g, '""')}"`; }
+  function csvCell(value) { return `"${String(value ?? '').replace(/"/g,'""')}"`; }
   function exportCsv() {
-    const rows = [['Situation', 'Match', 'Date', 'Joueur', 'Zone', 'Trajectoire', 'Points', 'Heure']];
-    for (const [mode, session] of Object.entries(state.sessions)) {
-      const matches = [...session.completed, { number: session.matchNumber, events: session.events }];
-      for (const match of matches) {
-        for (const event of match.events) {
-          rows.push([
-            MODES[mode].label, match.number, event.date || '', event.playerName || '', ZONE_NAMES[event.zone] || event.zone,
-            event.kind === 'fault' ? 'Faute adverse' : event.trajectory === 'under' ? 'Sous le sur-filet' : 'Au-dessus du sur-filet', event.points, event.time || ''
-          ]);
-        }
-      }
-    }
-    if (rows.length === 1) { showFeedback('AUCUNE ACTION À EXPORTER', true); return; }
-    const csv = '\uFEFF' + rows.map(row => row.map(csvCell).join(';')).join('\r\n');
-    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    const s = current();
+    const rows = [['Situation','Poule','Match','Date','Joueur','Adversaire','Zone','Trajectoire','Points','Heure']];
+    const matches = [...s.completed,{number:s.matchNumber,pair:activePair(),events:s.events}];
+    matches.forEach(match => {
+      const pair = match.pair || [0,1];
+      (match.events || []).forEach(event => {
+        const slot = event.player === 1 ? 1 : 0;
+        rows.push([
+          MODES[selectedMode].label,selectedSize,match.number,event.date||'',
+          event.playerName||'',s.players[pair[1-slot]]||'',
+          ZONES[event.zone]||event.zone,
+          event.kind === 'fault' ? 'Faute adverse' : event.points === 0 ? 'Rivière' : event.points === 2 ? 'Sous le sur-filet' : 'Au-dessus du sur-filet',
+          event.points,event.time||''
+        ]);
+      });
+    });
+    if (rows.length === 1) { feedback('Aucune action à exporter'); return; }
+    const csv = '\uFEFF' + rows.map(row=>row.map(csvCell).join(';')).join('\r\n');
+    const url = URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
     const link = document.createElement('a');
     link.href = url;
-    link.download = `badminton-impact-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.download = `badminton-impact-${selectedMode}-poule-${selectedSize}.csv`;
     document.body.appendChild(link); link.click(); link.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 2000);
-    showFeedback('EXPORT CSV PRÊT ✓');
+    setTimeout(()=>URL.revokeObjectURL(url),2000);
+    feedback('Export CSV prêt ✓');
   }
 
   function init() {
-    document.querySelectorAll('[data-mode]').forEach(button => button.addEventListener('click', () => {
-      state.mode = button.dataset.mode;
-      persist(); render(); showFeedback(MODES[state.mode].label);
+    document.querySelectorAll('[data-mode]').forEach(button => button.addEventListener('click',()=>{
+      selectedMode = button.dataset.mode;
+      selectedSize = 3;
+      navigate('pool');
     }));
-    document.querySelectorAll('[data-trajectory]').forEach(button => button.addEventListener('click', () => {
-      state.trajectory = button.dataset.trajectory;
-      persist(); render();
+    document.querySelectorAll('[data-pool-size]').forEach(button => button.addEventListener('click',()=>{
+      selectedSize = Number(button.dataset.poolSize);
+      renderPool();
     }));
-    document.querySelectorAll('[data-zone]').forEach(zone => {
-      zone.addEventListener('click', () => addAction(zone.dataset.zone, Number(zone.dataset.player)));
-      zone.addEventListener('keydown', e => {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); addAction(zone.dataset.zone, Number(zone.dataset.player)); }
-      });
+    $('rosterFields').addEventListener('input',event=>{
+      const input = event.target.closest('input[data-roster-index]');
+      if (!input) return;
+      const index = Number(input.dataset.rosterIndex);
+      current().players[index] = input.value.slice(0,36);
+      persist();
+      const p = pairings();
+      $('schedulePreview').innerHTML = p.map((pair,i)=>
+        `<div class="preview-row"><span>MATCH ${String(i+1).padStart(2,'0')}</span><span>${LETTERS[pair[0]]} · ${escapeHtml(playerName(pair[0]))} <b>VS</b> ${LETTERS[pair[1]]} · ${escapeHtml(playerName(pair[1]))}</span></div>`
+      ).join('');
     });
-    [0, 1].forEach(i => {
-      $('name' + i).addEventListener('change', e => {
-        state.players[i] = e.target.value.trim().slice(0, 36) || `Joueur ${i + 1}`;
-        persist(); render();
-      });
-    });
-    $('undoButton').addEventListener('click', undoLast);
-    document.querySelectorAll('[data-fault-player]').forEach(button => button.addEventListener('click', () => addAction('fault', Number(button.dataset.faultPlayer), 'fault')));
-    $('finishButton').addEventListener('click', finishMatch);
-    $('clearButton').addEventListener('click', clearMatch);
-    $('exportButton').addEventListener('click', exportCsv);
-    $('helpButton').addEventListener('click', () => $('helpDialog').showModal());
-    render();
+    $('startButton').addEventListener('click',()=>{persist();navigate('game');});
+    $('poolBack').addEventListener('click',()=>navigate('home'));
+    $('gameHome').addEventListener('click',()=>navigate('home'));
+    $('gameBack').addEventListener('click',()=>navigate('pool'));
+    document.querySelectorAll('[data-scorer]').forEach(button => button.addEventListener('click',()=>{
+      current().selectedScorer=Number(button.dataset.scorer);
+      persist();renderScores();
+    }));
+    document.querySelectorAll('[data-zone][data-points]').forEach(button => button.addEventListener('click',()=>{
+      addAction(button.dataset.zone,Number(button.dataset.points));
+    }));
+    $('faultButton').addEventListener('click',()=>addAction('fault',1,'fault'));
+    $('undoButton').addEventListener('click',undoLast);
+    $('finishButton').addEventListener('click',finishMatch);
+    $('clearButton').addEventListener('click',clearMatch);
+    $('exportButton').addEventListener('click',exportCsv);
+    $('helpButton').addEventListener('click',()=>$('helpDialog').showModal());
+    navigate('home');
     if ('serviceWorker' in navigator && location.protocol === 'https:') {
-      navigator.serviceWorker.register('./sw.js').catch(() => {});
+      navigator.serviceWorker.register('./sw.js').catch(()=>{});
     }
   }
-
   init();
 })();
