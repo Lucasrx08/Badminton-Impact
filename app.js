@@ -140,6 +140,112 @@
     totals[pair[1]].points += s.scores[1];
     return totals;
   }
+  function render3DCourt(last){
+    const svg = document.getElementById('courtArtwork');
+    if (!svg) return;
+    const farL = {x:300,y:221}, farR = {x:792,y:305};
+    const nearL = {x:93,y:515}, nearR = {x:626,y:603};
+    const pt = (x,t) => {
+      const lx=farL.x+(nearL.x-farL.x)*t, ly=farL.y+(nearL.y-farL.y)*t;
+      const rx=farR.x+(nearR.x-farR.x)*t, ry=farR.y+(nearR.y-farR.y)*t;
+      return {x:lx+(rx-lx)*x,y:ly+(ry-ly)*x};
+    };
+    const round=n=>Math.round(n*10)/10;
+    const xy=p=>`${round(p.x)},${round(p.y)}`;
+    const quad=(x1,t1,x2,t2)=>[pt(x1,t1),pt(x2,t1),pt(x2,t2),pt(x1,t2)].map(xy).join(' ');
+    const line=(p1,p2,color,width=4,extra='')=>`<line x1="${round(p1.x)}" y1="${round(p1.y)}" x2="${round(p2.x)}" y2="${round(p2.y)}" stroke="${color}" stroke-width="${width}" stroke-linecap="round" ${extra}/>`;
+    const zones=[
+      {id:'front-top',label:'AVANT · GAUCHE',x1:0,x2:.5,t1:.16,t2:.57,fill:'#f5f7f0',centerX:.25,captionT:.245,buttonT:.425},
+      {id:'front-bottom',label:'AVANT · DROITE',x1:.5,x2:1,t1:.16,t2:.57,fill:'#edf4e6',centerX:.75,captionT:.245,buttonT:.425},
+      {id:'back-top',label:'FOND · GAUCHE',x1:0,x2:.5,t1:.57,t2:1,fill:'#fbfcf8',centerX:.25,captionT:.645,buttonT:.825},
+      {id:'back-bottom',label:'FOND · DROITE',x1:.5,x2:1,t1:.57,t2:1,fill:'#f0f5e9',centerX:.75,captionT:.645,buttonT:.825}
+    ];
+    let markup = '';
+    markup += `<polygon points="${[farL,farR,{x:nearR.x+7,y:nearR.y+18},{x:nearL.x+7,y:nearL.y+18}].map(xy).join(' ')}" fill="#005E3D" opacity=".88"/>`;
+    markup += `<polygon points="${[farR,nearR,{x:nearR.x+7,y:nearR.y+18},{x:farR.x+7,y:farR.y+18}].map(xy).join(' ')}" fill="#074F37"/>`;
+    markup += `<polygon points="${quad(0,0,1,1)}" fill="url(#courtSurface)" stroke="#038F51" stroke-width="9" stroke-linejoin="round"/>`;
+    zones.forEach(zone => {markup+=`<polygon points="${quad(zone.x1,zone.t1,zone.x2,zone.t2)}" fill="${zone.fill}" opacity=".98"/>`;});
+    markup += `<g class="river-3d" data-zone="river" data-points="0" role="button" tabindex="0" aria-label="Rivière rose, 0 point"><polygon points="${quad(0,0,1,.16)}" fill="#F098A5" stroke="#E58293" stroke-width="2"/></g>`;
+    markup += line(pt(0,.16),pt(1,.16),'#038F51',6);
+    markup += line(pt(0,.57),pt(1,.57),'#038F51',6);
+    markup += line(pt(.5,.16),pt(.5,1),'#038F51',6);
+    markup += `<polygon points="${quad(0,0,1,1)}" fill="none" stroke="#038F51" stroke-width="8" stroke-linejoin="round" pointer-events="none"/>`;
+    const riverMid=pt(.5,.095);
+    markup += `<text x="${round(riverMid.x)}" y="${round(riverMid.y+8)}" transform="rotate(9 ${round(riverMid.x)} ${round(riverMid.y)})" text-anchor="middle" class="river-3d-label" pointer-events="none">RIVIÈRE · 0 PT</text>`;
+  
+    // Filet dressé sur le bord supérieur de ce demi-terrain.
+    const height=selectedMode==='baston'?0:selectedMode==='carre'?52:114;
+    const meshLines=selectedMode==='carre'?3:7;
+    if(height){
+      markup += `<polygon points="${[farL,farR,{x:farR.x,y:farR.y-height},{x:farL.x,y:farL.y-height}].map(xy).join(' ')}" fill="#f4f5f2" fill-opacity=".29" stroke="#3F4942" stroke-width="2.4"/>`;
+      for(let i=0;i<=27;i++){
+        const x=pt(i/27,0);
+        markup+=line(x,{x:x.x,y:x.y-height},'#303D38',1.45,'opacity=".73"');
+      }
+      for(let j=1;j<meshLines;j++){
+        markup+=line({x:farL.x,y:farL.y-height*j/meshLines},{x:farR.x,y:farR.y-height*j/meshLines},'#35423D',1.6,'opacity=".72"');
+      }
+      markup+=line({x:farL.x,y:farL.y-height},{x:farR.x,y:farR.y-height},'#FFFFFF',7);
+      markup+=line({x:farL.x,y:farL.y-height},{x:farR.x,y:farR.y-height},'#747A6F',2);
+    }
+    // Le sur-filet reste jaune dans les trois situations, même sans filet ordinaire.
+    const ropeHeight=selectedMode==='roi'?160:selectedMode==='carre'?151:142;
+    const ropeL={x:farL.x,y:farL.y-ropeHeight},ropeR={x:farR.x,y:farR.y-ropeHeight};
+    markup+=line(ropeL,ropeR,'#EFF700',8,'filter="url(#shuttleShade)"');
+    markup+=line({x:ropeL.x,y:ropeL.y-1},{x:ropeR.x,y:ropeR.y-1},'#FFFF83',2.5);
+    for(const base of [farL,farR]){
+      const top={x:base.x,y:base.y-ropeHeight-7};
+      markup+=`<line x1="${base.x+5}" y1="${base.y+8}" x2="${top.x+5}" y2="${top.y}" stroke="#263E32" opacity=".15" stroke-width="13" stroke-linecap="round"/>`;
+      markup+=line(base,top,'url(#netPole)',9,'filter="url(#shuttleShade)"');
+      markup+=`<circle cx="${top.x}" cy="${top.y}" r="5.3" fill="#fff" stroke="#859189" stroke-width="1.3"/>`;
+    }
+    const ropeCentre={x:(ropeL.x+ropeR.x)/2,y:(ropeL.y+ropeR.y)/2};
+    markup+=`<rect x="${round(ropeCentre.x-68)}" y="${round(ropeCentre.y-34)}" width="136" height="26" rx="13" fill="#2F4431" opacity=".92"/>`;
+    markup+=`<text x="${round(ropeCentre.x)}" y="${round(ropeCentre.y-16)}" text-anchor="middle" class="rope-title" pointer-events="none">SUR-FILET</text>`;
+    if(selectedMode!=='baston'){
+      const modeLabel=selectedMode==='carre'?'FILET ABAISSÉ':'FILET NORMAL';
+      const anchor={x:farL.x+7,y:farL.y-height-12};
+      markup+=`<text x="${anchor.x}" y="${anchor.y}" class="net-height-label" pointer-events="none">${modeLabel}</text>`;
+    } else {
+      markup+=`<text x="${farL.x+5}" y="${farL.y-15}" class="net-height-label" pointer-events="none">SANS FILET</text>`;
+    }
+  
+    // Petite trajectoire illustrative et volant : bougent après le dernier impact.
+    const mapping={
+      'front-top':{x:.25,t:.43},'front-bottom':{x:.75,t:.43},
+      'back-top':{x:.25,t:.81},'back-bottom':{x:.75,t:.81},
+      river:{x:.52,t:.08},fault:{x:.7,t:.62}
+    };
+    const landing=last&&mapping[last.zone]?mapping[last.zone]:{x:.72,t:.75};
+    const target=pt(landing.x,landing.t);
+    const shuttleX=round(target.x-7),shuttleY=round(target.y-19);
+    const start=pt(.62,0);
+    const arcColor=last?.points===2?'#83AC0B':last?.points===0?'#D98093':'#968769';
+    markup+=`<path d="M ${round(start.x)} ${round(start.y-56)} Q ${round((start.x+target.x)/2+65)} ${round(Math.min(start.y,target.y)-165)} ${round(target.x)} ${round(target.y-5)}" stroke="${arcColor}" stroke-width="4" stroke-dasharray="9 11" fill="none" opacity=".61" stroke-linecap="round" pointer-events="none"/>`;
+    markup+=`<ellipse cx="${round(target.x)}" cy="${round(target.y+3)}" rx="14" ry="6" fill="#608567" opacity=".22" pointer-events="none"/>`;
+    markup+=`<g transform="translate(${shuttleX} ${shuttleY}) rotate(-33)" filter="url(#shuttleShade)" pointer-events="none"><path d="M-12 -1 -29 -58 -17 -64 -2 -6Z" fill="#FFF" stroke="#78877D" stroke-width="1.4"/><path d="M-8 -2 -12 -68 1 -70 4 -5Z" fill="#FAFAF6" stroke="#748378" stroke-width="1.4"/><path d="M-2 -4 7 -64 20 -58 10 -1Z" fill="#FFF" stroke="#77897B" stroke-width="1.4"/><path d="M-22 -41 11 -40M-19 -27 12 -27" stroke="#94A19A" stroke-width="2" fill="none"/><path d="M-12 -1Q0 8 11 -1L7 12Q0 17 -7 12Z" fill="#37483E" stroke="#FFF" stroke-width="2"/><ellipse cx="0" cy="13" rx="7" ry="5" fill="#F6EEE6" stroke="#737F76" stroke-width="1.5"/></g>`;
+  
+    zones.forEach(zone=>{
+      const cap=pt(zone.centerX,zone.captionT);
+      markup+=`<text x="${round(cap.x)}" y="${round(cap.y)}" text-anchor="middle" transform="rotate(9 ${round(cap.x)} ${round(cap.y)})" class="zone-3d-caption" pointer-events="none">${zone.label}</text>`;
+      for (const n of [1,2]){
+        const p=pt(zone.centerX+(n===1?-.105:.105),zone.buttonT);
+        const active=last?.zone===zone.id && last.points===n;
+        const fill=n===1?'#EDE6E2':'#B4D01A';
+        const stroke=active?'#E8A64F':n===1?'#D3C6BE':'#92AF0D';
+        const label=n===1?'AU-DESSUS':'EN DESSOUS';
+        const a11y=`${zone.label.toLowerCase()}, ${n===1?'au-dessus du sur-filet':'sous le sur-filet'}, ${n} ${n===1?'point':'points'}`;
+        markup+=`<g class="point-pad${active?' is-last':''}" data-zone="${zone.id}" data-points="${n}" role="button" tabindex="0" aria-label="${a11y}" transform="translate(${round(p.x)} ${round(p.y)}) rotate(9)">`;
+        markup+=`<rect x="-48" y="-32" width="96" height="64" rx="12" fill="${fill}" stroke="${stroke}" stroke-width="${active?5:2.4}" filter="url(#padShade)"/>`;
+        markup+=`<text x="0" y="4" text-anchor="middle" class="pad-number" pointer-events="none">+${n}</text>`;
+        markup+=`<text x="0" y="21" text-anchor="middle" class="pad-caption" pointer-events="none">${label}</text></g>`;
+      }
+    });
+    markup+=`<text x="99" y="596" class="court-foot-caption" pointer-events="none">LIGNE DE FOND</text>`;
+    markup+=`<text x="822" y="526" class="court-foot-caption" pointer-events="none">½ TERRAIN</text>`;
+    svg.innerHTML=markup;
+  }
+
   function renderScores() {
     const s = current();
     const pair = activePair();
@@ -160,14 +266,8 @@
     $('selectedName').textContent = playerName(pair[s.selectedScorer]);
     $('undoButton').disabled = s.events.length === 0;
     $('finishButton').disabled = s.events.length === 0;
-    const edge = $('netEdge');
-    edge.className = `net-edge ${selectedMode === 'baston' ? 'net-none' : selectedMode === 'carre' ? 'net-low' : 'net-normal'}`;
     $('netPill').textContent = MODES[selectedMode].net;
-    const last = s.events.at(-1);
-    document.querySelectorAll('[data-zone][data-points]').forEach(button => {
-      const isLast = Boolean(last && last.zone === button.dataset.zone && last.points === Number(button.dataset.points));
-      button.classList.toggle('is-last',isLast);
-    });
+    render3DCourt(s.events.at(-1));
   }
   function renderRanking() {
     const totals = playerTotals();
@@ -341,9 +441,15 @@
       current().selectedScorer=Number(button.dataset.scorer);
       persist();renderScores();
     }));
-    document.querySelectorAll('[data-zone][data-points]').forEach(button => button.addEventListener('click',()=>{
-      addAction(button.dataset.zone,Number(button.dataset.points));
-    }));
+    $('court3D').addEventListener('click',event=>{
+      const target=event.target.closest('[data-zone][data-points]');
+      if(target) addAction(target.dataset.zone,Number(target.dataset.points));
+    });
+    $('court3D').addEventListener('keydown',event=>{
+      if(event.key !== 'Enter' && event.key !== ' ') return;
+      const target=event.target.closest('[data-zone][data-points]');
+      if(target) { event.preventDefault(); addAction(target.dataset.zone,Number(target.dataset.points)); }
+    });
     $('faultButton').addEventListener('click',()=>addAction('fault',1,'fault'));
     $('undoButton').addEventListener('click',undoLast);
     $('finishButton').addEventListener('click',finishMatch);
